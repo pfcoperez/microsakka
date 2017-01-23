@@ -18,10 +18,10 @@ object KeyStore {
     }
 
     case class Get(k: K) extends Query
-    case object GetAll extends Query
+    case class GetAll() extends Query
     case class Put(k: K, v: V) extends Query
     case class Delete(k: K) extends Query
-    case object Clear extends Query
+    case class Clear() extends Query
   }
 
   object Responses {

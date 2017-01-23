@@ -21,3 +21,6 @@ project/plugins/project/
 
 # Ensime specific
 .ensime*
+
+# Journal local files
+journal/

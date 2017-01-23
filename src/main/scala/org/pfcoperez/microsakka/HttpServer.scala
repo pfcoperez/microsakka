@@ -12,6 +12,7 @@ import de.heikoseeberger.akkahttpjson4s.Json4sSupport
 import org.json4s.{DefaultFormats, jackson}
 import org.pfcoperez.microsakka.services.keystore.KeyStore.Queries._
 import org.pfcoperez.microsakka.services.keystore.KeyStore.Responses._
+import org.pfcoperez.microsakka.services.keystore.PersistentKS
 import org.pfcoperez.microsakka.services.keystore.implementation.SimpleInMemoryKS
 
 
@@ -20,7 +21,12 @@ object HttpServer extends App with Json4sSupport {
   implicit val system = ActorSystem("MicroService")
   implicit val materializer = ActorMaterializer()
 
-  val ksActor = system.actorOf(Props(new SimpleInMemoryKS))
+  object ServicesProps {
+    val simpleKS = Props(new SimpleInMemoryKS)
+    val persistentKS = Props(new PersistentKS)
+  }
+
+  val ksActor = system.actorOf(ServicesProps.persistentKS)
   implicit val rqTimeout = Timeout(1 second)
 
   implicit val serialization = jackson.Serialization // or native.Serialization
@@ -33,7 +39,7 @@ object HttpServer extends App with Json4sSupport {
       }
     } ~ path("kv") {
       get {
-        onSuccess(ksActor ? GetAll) {
+        onSuccess(ksActor ? GetAll()) {
           case Result(_, Matches(entries)) =>
             complete(entries) //TODO
         }
